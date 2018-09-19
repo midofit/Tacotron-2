@@ -30,14 +30,17 @@ def build_from_path(hparams, input_dirs, mel_dir, linear_dir, wav_dir, n_jobs=12
 	futures = []
 	index = 1
 	for input_dir in input_dirs:
-		with open(os.path.join(input_dir, 'metadata.csv'), encoding='utf-8') as f:
+		with open(os.path.join(input_dir, 'metadata.csv'),errors='ignore', encoding='utf-8') as f:
 			for line in f:
-				parts = line.strip().split('|')
-				basename = parts[0]
-				wav_path = os.path.join(input_dir, 'wavs', '{}.wav'.format(basename))
-				text = parts[2]
-				futures.append(executor.submit(partial(_process_utterance, mel_dir, linear_dir, wav_dir, basename, wav_path, text, hparams)))
-				index += 1
+				try:
+					parts = line.strip().split('|')
+					basename = parts[1]
+					wav_path = os.path.join(input_dir, 'wavs', '{}.wav'.format(basename))
+					text = parts[2]
+					futures.append(executor.submit(partial(_process_utterance, mel_dir, linear_dir, wav_dir, basename, wav_path, text, hparams)))
+					index += 1
+				except ValueError:
+					continue
 
 	return [future.result() for future in tqdm(futures) if future.result() is not None]
 

@@ -164,7 +164,7 @@ class EncoderConvolutions:
 		self.enc_conv_num_layers = hparams.enc_conv_num_layers
 
 	def __call__(self, inputs):
-		with tf.variable_scope(self.scope):
+		with tf.variable_scope(self.scope),tf.device("/device:GPU:0"):
 			x = inputs
 			for i in range(self.enc_conv_num_layers):
 				x = conv1d(x, self.kernel_size, self.channels, self.activation,
@@ -374,7 +374,7 @@ class Postnet:
 
 
 def conv1d(inputs, kernel_size, channels, activation, is_training, drop_rate, scope):
-	with tf.variable_scope(scope):
+	with tf.variable_scope(scope),tf.device("/device:GPU:0"):
 		conv1d_output = tf.layers.conv1d(
 			inputs,
 			filters=channels,
